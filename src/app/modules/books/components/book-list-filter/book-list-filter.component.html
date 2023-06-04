@@ -1,0 +1,8 @@
+<div class="filter-options">
+  <label>Category  </label>
+  <select [(ngModel)]="selectedCategory" (change)="onCategoryChange()">
+    <option value="">All</option>
+    <option *ngFor="let category of categories" [value]="category">{{ category }}</option>
+  </select>
+  <hr>
+</div>

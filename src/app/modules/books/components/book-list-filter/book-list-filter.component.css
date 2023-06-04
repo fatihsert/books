@@ -1,0 +1,33 @@
+/* book-list-filter.component.css */
+
+.filter-options {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+  background-color: #ffffff;
+  padding: 1rem;
+  box-shadow: 0 0 10px rgba(1, 1, 1, 0.1);
+  padding: 15px;
+}
+
+.filter-options label {
+  margin-right: 10px;
+  font-weight: bold;
+}
+.filter-options select {
+  width: 200px;
+  padding: 8px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+  color: #333;
+}
+.filter-options select :focus {
+  outline: none;
+  border-color: #2196f3;
+  box-shadow: 0 0 5px rgba(33, 150, 243, 0.5);
+}
+.filter-options select option {
+  padding: 8px;
+}

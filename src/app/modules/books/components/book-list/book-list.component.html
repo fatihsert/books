@@ -1,0 +1,21 @@
+<app-book-list-filter
+  [books]="books"
+  (categoryFilter)="onCategoryFilter($event)"
+  (clearFilter)="clearCategoryFilter()"
+></app-book-list-filter>
+
+<div class="book-list">
+  <div
+    class="book-card"
+    *ngFor="let book of filteredBooks"
+    (click)="onBookDetail(book)"
+  >
+    <img
+      class="book-card__image"
+      [src]="book.coverImageUrl"
+      alt="Book Cover Image"
+    />
+    <h2 class="book-card__title">{{ book.title }}</h2>
+    <p class="book-card__author">By {{ book.author }}</p>
+  </div>
+</div>

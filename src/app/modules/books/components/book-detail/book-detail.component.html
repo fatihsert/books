@@ -1,0 +1,10 @@
+<div class="book-container">
+  <div *ngIf="book" class="book-details">
+    <h2>{{ book.title }}</h2>
+    <p><strong>Author:</strong> {{ book.author }}</p>
+    <p><strong>Category:</strong> {{ book.category }}</p>
+    <img class="book-cover" [src]="book.coverImageUrl" alt="Book Cover" />
+    <p class="book-description">{{ book.description }}</p>
+    <a class="back-link" [routerLink]="['/']">Back</a>
+  </div>
+</div>

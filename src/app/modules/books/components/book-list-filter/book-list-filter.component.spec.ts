@@ -1,67 +1,49 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BookListFilterComponent } from './book-list-filter.component';
-import { By } from '@angular/platform-browser';
+import { BookService } from '../../services/book.service';
+import { Book } from '../../models/book.model';
 
 describe('BookListFilterComponent', () => {
   let component: BookListFilterComponent;
   let fixture: ComponentFixture<BookListFilterComponent>;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [BookListFilterComponent],
-    }).compileComponents();
-  });
-
   beforeEach(() => {
+    TestBed.configureTestingModule({
+      declarations: [BookListFilterComponent],
+      providers: [BookService],
+    }).compileComponents();
+
     fixture = TestBed.createComponent(BookListFilterComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
   });
 
-  it('should create the component', () => {
+  it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should emit category filter event when applyFilter is called', () => {
-    const selectedCategory = 'Category 1';
-    let emittedCategory: string | undefined;
-    component.categoryFilter.subscribe((category) => {
-      emittedCategory = category;
-    });
+  it('should set categories on book changes', () => {
+    const mockBooks: Book[] = [
+      { id: 1, title: 'Book 1', author: 'Author 1', category: 'Category 1', coverImageUrl: 'image-url-1', description: 'Description 1' },
+      { id: 2, title: 'Book 2', author: 'Author 2', category: 'Category 2', coverImageUrl: 'image-url-2', description: 'Description 2' },
+    ];
+    const mockChanges = {
+      books: {
+        currentValue: mockBooks,
+      },
+    };
 
-    component.selectedCategory = selectedCategory;
-    component.applyFilter();
+    component.ngOnChanges(mockChanges as any);
 
-    expect(emittedCategory).toBe(selectedCategory);
+    expect(component.categories).toEqual(['Category 1', 'Category 2']);
   });
 
-  it('should emit clear filter event when clearCategoryFilter is called', () => {
-    let clearFilterCalled = false;
-    component.clearFilter.subscribe(() => {
-      clearFilterCalled = true;
-    });
+  it('should emit category filter', () => {
+    spyOn(component.categoryFilter, 'emit');
+    const category = 'Category 1';
 
-    component.clearCategoryFilter();
+    component.selectedCategory = category;
+    component.onCategoryChange();
 
-    expect(clearFilterCalled).toBe(true);
-    expect(component.selectedCategory).toBe('');
-  });
-
-  it('should render filter options', () => {
-    component.categories = ['Category 1', 'Category 2'];
-    fixture.detectChanges();
-
-    const filterOptions = fixture.debugElement.queryAll(By.css('.filter-option'));
-    expect(filterOptions.length).toBe(2);
-    expect(filterOptions[0].nativeElement.textContent).toBe('Category 1');
-    expect(filterOptions[1].nativeElement.textContent).toBe('Category 2');
-  });
-
-  it('should update selected category', () => {
-    const selectedCategory = 'Category 1';
-    const filterOption = fixture.debugElement.query(By.css('.filter-option'));
-    filterOption.nativeElement.click();
-
-    expect(component.selectedCategory).toBe(selectedCategory);
+    expect(component.categoryFilter.emit).toHaveBeenCalledWith(category);
   });
 });

@@ -1,67 +1,98 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { BookListFilterComponent } from './book-list-filter.component';
-import { By } from '@angular/platform-browser';
+import { Router } from '@angular/router';
+import { BookListComponent } from './book-list.component';
+import { BookService } from '../../services/book.service';
+import { of } from 'rxjs';
+import { Book } from '../../models/book.model';
+import { filterBooksByCategory } from 'src/app/utils/book-utils';
 
-describe('BookListFilterComponent', () => {
-  let component: BookListFilterComponent;
-  let fixture: ComponentFixture<BookListFilterComponent>;
-
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [BookListFilterComponent],
-    }).compileComponents();
-  });
+describe('BookListComponent', () => {
+  let component: BookListComponent;
+  let fixture: ComponentFixture<BookListComponent>;
+  let mockBookService: jasmine.SpyObj<BookService>;
+  let mockRouter: jasmine.SpyObj<Router>;
+  const mockBooks: Book[] = [
+    {
+      id: 1,
+      title: 'Book 1',
+      author: 'Author 1',
+      category: 'Category 1',
+      coverImageUrl: 'image-url-1',
+      description: 'Description 1',
+    },
+    {
+      id: 2,
+      title: 'Book 2',
+      author: 'Author 2',
+      category: 'Category 2',
+      coverImageUrl: 'image-url-2',
+      description: 'Description 2',
+    },
+    // Add more mock books as needed
+  ];
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(BookListFilterComponent);
+    mockBookService = jasmine.createSpyObj('BookService', ['getBooks']);
+    mockRouter = jasmine.createSpyObj('Router', ['navigate']);
+
+    TestBed.configureTestingModule({
+      declarations: [BookListComponent],
+      providers: [
+        { provide: BookService, useValue: mockBookService },
+        { provide: Router, useValue: mockRouter },
+      ],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(BookListComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
   });
 
-  it('should create the component', () => {
+  it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should emit category filter event when applyFilter is called', () => {
-    const selectedCategory = 'Category 1';
-    let emittedCategory: string | undefined;
-    component.categoryFilter.subscribe((category) => {
-      emittedCategory = category;
-    });
+  it('should fetch and initialize books', () => {
+    mockBookService.getBooks.and.returnValue(of(mockBooks));
 
-    component.selectedCategory = selectedCategory;
-    component.applyFilter();
+    fixture.detectChanges();
 
-    expect(emittedCategory).toBe(selectedCategory);
+    expect(component.books).toEqual(mockBooks);
+    expect(component.filteredBooks).toEqual(mockBooks);
+    expect(mockBookService.getBooks).toHaveBeenCalled();
   });
 
-  it('should emit clear filter event when clearCategoryFilter is called', () => {
-    let clearFilterCalled = false;
-    component.clearFilter.subscribe(() => {
-      clearFilterCalled = true;
-    });
+  it('should filter books by category', () => {
+    const category = 'Category 1';
+    component.books = mockBooks;
+
+    component.onCategoryFilter(category);
+
+    expect(component.filteredBooks).toEqual([mockBooks[0]]);
+  });
+
+  it('should clear category filter', () => {
+    component.books = mockBooks;
+    component.filteredBooks = [mockBooks[0]];
 
     component.clearCategoryFilter();
 
-    expect(clearFilterCalled).toBe(true);
-    expect(component.selectedCategory).toBe('');
+    expect(component.filteredBooks).toEqual(mockBooks);
   });
 
-  it('should render filter options', () => {
-    component.categories = ['Category 1', 'Category 2'];
-    fixture.detectChanges();
+  it('should navigate to book detail', () => {
+    const book = mockBooks[0];
 
-    const filterOptions = fixture.debugElement.queryAll(By.css('.filter-option'));
-    expect(filterOptions.length).toBe(2);
-    expect(filterOptions[0].nativeElement.textContent).toBe('Category 1');
-    expect(filterOptions[1].nativeElement.textContent).toBe('Category 2');
+    component.onBookDetail(book);
+
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/books', book.id]);
   });
 
-  it('should update selected category', () => {
-    const selectedCategory = 'Category 1';
-    const filterOption = fixture.debugElement.query(By.css('.filter-option'));
-    filterOption.nativeElement.click();
+  it('should unsubscribe from the subscription on destroy', () => {
+    const mockSubscription = jasmine.createSpyObj('Subscription', ['unsubscribe']);
+    component.subscription = mockSubscription;
 
-    expect(component.selectedCategory).toBe(selectedCategory);
+    component.ngOnDestroy();
+
+    expect(mockSubscription.unsubscribe).toHaveBeenCalled();
   });
 });

@@ -5,6 +5,8 @@ import { BookService } from '../../services/book.service';
 import { of } from 'rxjs';
 import { Book } from '../../models/book.model';
 import { filterBooksByCategory } from 'src/app/utils/book-utils';
+import { BookListFilterComponent } from '../book-list-filter/book-list-filter.component';
+import { FormsModule } from '@angular/forms';
 
 describe('BookListComponent', () => {
   let component: BookListComponent;
@@ -36,7 +38,8 @@ describe('BookListComponent', () => {
     mockRouter = jasmine.createSpyObj('Router', ['navigate']);
 
     TestBed.configureTestingModule({
-      declarations: [BookListComponent],
+      declarations: [BookListComponent, BookListFilterComponent],
+      imports: [FormsModule],
       providers: [
         { provide: BookService, useValue: mockBookService },
         { provide: Router, useValue: mockRouter },

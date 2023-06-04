@@ -5,9 +5,7 @@ import {
   Output,
   SimpleChanges,
 } from '@angular/core';
-import { BookService } from '../../services/book.service';
 import { Book } from '../../models/book.model';
-import { getUniqueCategories } from 'src/app/utils/book-utils';
 
 @Component({
   selector: 'app-book-list-filter',

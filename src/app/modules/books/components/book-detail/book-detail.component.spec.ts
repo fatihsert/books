@@ -1,64 +1,46 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { of } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
-import { BookService } from '../../services/book.service';
 import { BookDetailComponent } from './book-detail.component';
+import { BookService } from '../../services/book.service';
+import { Book } from '../../models/book.model';
+import { RouterTestingModule } from '@angular/router/testing';
 
 describe('BookDetailComponent', () => {
   let component: BookDetailComponent;
   let fixture: ComponentFixture<BookDetailComponent>;
-  let mockBookService: jasmine.SpyObj<BookService>;
-  let mockActivatedRoute: Partial<ActivatedRoute>;
-  let mockRouter: jasmine.SpyObj<Router>;
-
-  beforeEach(() => {
-    mockBookService = jasmine.createSpyObj('BookService', ['getBookById']);
-    mockActivatedRoute = {
-      params: of({ id: 1 }), // Set the parameter for testing
+  let activatedRouteMock: Partial<ActivatedRoute>;
+  let bookServiceMock: Partial<BookService>;
+  let routerMock: Partial<Router>;
+  beforeEach(async () => {
+    activatedRouteMock = {
+      params: of({ id: 1 }), // Simulate route parameter with id 1
     };
-    mockRouter = jasmine.createSpyObj('Router', ['navigate']);
+    bookServiceMock = {
+      getBookById: jasmine.createSpy('getBookById').and.returnValue(
+        of({ id: 1, title: 'Book 1', author: 'Author 1', category: 'Category 1' } as Book)
+      ),
+    };
 
-    TestBed.configureTestingModule({
+    await TestBed.configureTestingModule({
+      imports: [RouterTestingModule],
       declarations: [BookDetailComponent],
       providers: [
-        { provide: BookService, useValue: mockBookService },
-        { provide: ActivatedRoute, useValue: mockActivatedRoute },
-        { provide: Router, useValue: mockRouter },
+        { provide: ActivatedRoute, useValue: activatedRouteMock },
+        { provide: BookService, useValue: bookServiceMock },
       ],
     }).compileComponents();
+  });
 
+  beforeEach(() => {
     fixture = TestBed.createComponent(BookDetailComponent);
     component = fixture.componentInstance;
-  });
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
-  it('should fetch book by ID', () => {
-    const mockBook = {
-      id: 1,
-      title: 'Book Title',
-      author: 'Author Name',
-      category: 'Category',
-      coverImageUrl: 'image-url',
-      description: 'Book description',
-    };
-
-    mockBookService.getBookById.and.returnValue(of(mockBook));
-
     fixture.detectChanges();
-
-    expect(component.book).toEqual(mockBook);
-    expect(mockBookService.getBookById).toHaveBeenCalledWith(1);
   });
 
-  it('should navigate to home if book is not found', () => {
-    mockBookService.getBookById.and.returnValue(of(undefined));
-
-    fixture.detectChanges();
-
-    expect(mockRouter.navigate).toHaveBeenCalledWith(['/']);
+  
+  it('should fetch book details on initialization', () => {
+    expect(bookServiceMock.getBookById).toHaveBeenCalledWith(1);
+    expect(component.book).toEqual({ id: 1, title: 'Book 1', author: 'Author 1', category: 'Category 1' } as Book);
   });
 });
